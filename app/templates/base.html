@@ -5,15 +5,30 @@
       {% else %}
       <title>Lecture Hall Booking</title>
       {% endif %}
+      <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+      <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+      <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+	<script>
+	$(function() {
+		$(".dtpick").datepicker();
+	});
+	</script>
     </head>
     <body>
         <div>
-		<a href="{{ url_for('index') }}">Home</a>
+		<a href="{{ url_for('index') }}">Home</a> 
+		<span style="display:inline-block; width: 10;"></span>
 		{% if current_user.is_anonymous %}
 		<a href="{{ url_for('login') }}">Login</a>
 		{% else %}
 		<a href="{{ url_for('logout') }}">Logout</a>
 		{% endif %}
+		<span style="display:inline-block; width: 10;"></span>
+		<a href="{{ url_for('cancel_booking') }}">Cancel Booking</a>
+		<span style="display:inline-block; width: 10;"></span>
+		<a href="{{ url_for('room_occupation') }}">Room Occupation</a>
+		<span style="display:inline-block; width: 10;"></span>
+		<a href="{{ url_for('book') }}">Book a Room </a>
 	</div>
         <hr>
 	{% with messages = get_flashed_messages() %}

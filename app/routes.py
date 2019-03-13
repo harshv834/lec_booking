@@ -1,15 +1,17 @@
 from app import app,db
 from flask import render_template,flash,redirect, request, url_for
-from app.forms import LoginForm, RegistrationForm
-from app.models import User
+from app.forms import *
+from app.models import *
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
+import sqlite3
+import datetime
 
 @app.route('/')
 @app.route('/index')
 @login_required
 def index():
-    return render_template('index.html',title='Home',posts=posts)
+    return render_template('index.html')
 
 @app.route('/login', methods = ['GET','POST'])
 def login():
@@ -40,12 +42,67 @@ def register():
         return redirect(url_for('index'))
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(username=form.username.data, email=form.email.data)
+        user = User(username=form.username.data, email=form.email.data,\
+                fullname = form.fullname.data, position= form.position.data)
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
         flash('Congratulations, you are now a registered user.')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
+
+@app.route('/book',methods = ['GET','POST'])
+@login_required
+def book():
+    form = BookingForm()
+    if form.validate_on_submit():
+        booker = current_user
+        room = Room.query.filter_by(id = form.rooms.data).first()
+        booking = Booking(purpose=form.purpose.data,roomID=room.id,bookerID=booker.id,date=form.date.data,startTime=form.startTime.data,endTime=form.endTime.data)
+        db.session.add(booking)
+        db.session.commit()
+        flash('Booking Successful')
+        return redirect(url_for('index'))
+    return render_template('booking.html',title='Booking',form=form)
+
+@app.route('/cancelbooking',methods = ['POST', 'GET'])
+@login_required
+def cancel_booking():
+    form = CancelBookingForm()
+    if form.validate_on_submit():
+        booking = Booking.query.filter_by(id=form.ids.data).first()
+
+        if booking.date<=datetime.now():
+            flash("Past Booking, unable to cancel")
+            return redirect(url_for('cancel_booking'))
+
+        db.session.delete(booking)
+        db.session.commit()
+        flash("Booking deleted successfully")
+        return redirect(url_for('index'))
+    return render_template('cancelbooking.html',title="Cancel Booking", form=form)
+
+@app.route('/roomoccupation',methods = ['GET','POST'])
+def room_occupation():
+    form = RoomOccupationForm()
+    if form.validate_on_submit():
+        bookings = Booking.query.filter_by(date=datetime.combine(form.date.data,datetime.min.time())).all()
+        room_occ_list = []
+        times = range(9,19)
+        rooms = Rooms.query.all()
+        allrooms = []
+        for room in rooms:
+            room_oc = dict()
+            room_oc['roomNum'] = room.roomNum
+            room_oc['roomhours'] = [False]*14
+            for hour in times:
+                bookings  = Booking.query.filter_by(date=datetime.combine(form.date.data,datetime.min.time())).filter_by(roomId=room.id).all()
+                for booking in bookings:
+                    if hour + 0.5 < booking.endTime and hour +0.5 > meeting.startTime:
+                        room_oc['roomhours'][hour-9] = True
+                room_occ_list.append(room_oc)
+                allrooms.append({'roomNum':room.roomNum,'ac':room.ac,'projector':room.projector})
+        return render_template('roomocclist.html',title='Room Occupancy',room_occ_list=room_occ_list, date=form.date.data,hours=[str(hour) for hour in times],allrooms=allrooms)
+    return render_template('roomoccupation.html',title='Check Room Occupation',form=form)
 
 

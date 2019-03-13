@@ -7,8 +7,10 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer,primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(64), index=True, unique=True)
+    fullname = db.Column(db.String(64))
+    position=db.Column(db.String(64))
     password_hash = db.Column(db.String(128))
-    posts = db.relationship('Post', backref='author', lazy='dynamic')
+    bookings = db.relationship('Booking', backref='booker', lazy='dynamic')
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -20,14 +22,27 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
 
-class Post(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    body = db.Column(db.String(140))
-    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+class Room(db.Model):
+    id = db.Column(db.Integer, primary_key=True,unique=True)
+    roomNum = db.Column(db.String(64))
+    ac = db.Column(db.Boolean)
+    projector = db.Column(db.Boolean)
+    bookings = db.relationship('Booking', backref='room',lazy = 'dynamic')
 
     def __repr__(self):
-        return '<Post {}>'.format(self.body)
+        return '<Room {}>'.format(self.roomNum)
+
+class Booking(db.Model):
+    id = db.Column(db.Integer, primary_key=True, unique=True)
+    purpose = db.Column(db.String(64),unique = True)
+    roomID = db.Column(db.Integer, db.ForeignKey('room.id'))
+    bookerID = db.Column(db.Integer, db.ForeignKey('user.id'))
+    date = db.Column(db.DateTime)
+    startTime = db.Column(db.Integer)
+    endTime = db.Column(db.Integer)
+    
+    def __repr__(self):
+        return '<Booking Room Number {} for  {} by  {} on {} from {} to {}'.format(self.id,self.roomID.roomNum,self.purpose,self.bookerID.fullname,self.date,self.startTime,self.endTime)
 
 @login.user_loader
 def load_user(id):

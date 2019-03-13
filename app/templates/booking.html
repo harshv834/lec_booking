@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+	<h1>Book a Room</h1>
+	<form action="" method="post">
+	{% from "_misc.html" import render_field %}
+		{{ form.hidden_tag() }}
+		<p> {{ form.purpose.label }}<br>
+		{{ form.purpose(size=32) }}<br>
+		{%for error in form.purpose.errors %}
+		<span style="color: red;">[{{error}}]</span>
+		{%endfor%}
+		</p>
+		<dl> {{ render_field(form.rooms) }}
+		</dl>
+
+		<p> {{ form.date.label }}<br>
+		{{ form.date(class="dtpick") }}<br>
+		{%for error in form.date.errors %}
+		<span style="color: red;">[{{error}}]</span>
+		{%endfor%}
+		</p>
+
+		<dl> {{ render_field(form.startTime) }}
+		     {{ render_field(form.endTime) }}
+		</dl>
+	<p> {{ form.submit() }} </p>
+	</form>
+{% endblock %}
+

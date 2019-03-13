@@ -1,0 +1,42 @@
+{% extends "base.html"}
+
+{%block content %}
+<h1>Room details</h1>
+<table border="1" cellpadding=3>
+	<tr>
+		<th>Room Number</th>
+		<th>Ac</th>
+		<th>Projector</th>
+	</tr>
+	{% for room in allrooms %}
+	<tr>
+		<td> {{room.roomNum}}</td>
+		<td> {{room.ac}}</td>
+		<td> {{ room.projector }}</td>
+	</tr>
+	{%endfor%}
+</table>
+<hr>
+<h2> Room Occupation Status on {{date}}: </h2>
+<table>
+	<tr>
+		<th>Room</th>
+		{%for hour in hours %}
+		</th> {{hour}}</th>
+		{%endfor%}
+	</tr>
+{% for room in room_occ_list %}
+	<tr>
+		<td>{{ room.roomNum }}</td>
+		{% for hour in room.roomHours%}
+		{% if hour %}
+		<td bgcolor="#FF0000"> X</td>
+		{% else %}
+		<td bgcolor="#00FF00">O</td>
+		{% endif %}
+		{% endfor %}
+	</tr>
+{% endfor %}
+</table>
+{% endblock %}
+
