@@ -5,7 +5,7 @@ from app.models import *
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 import sqlite3
-import datetime
+from datetime import datetime,date
 
 @app.route('/')
 @app.route('/index')
@@ -86,22 +86,25 @@ def cancel_booking():
 def room_occupation():
     form = RoomOccupationForm()
     if form.validate_on_submit():
-        bookings = Booking.query.filter_by(date=datetime.combine(form.date.data,datetime.min.time())).all()
+        bookings = Booking.query.filter_by(date=datetime.combine(form.date.data,datetime.min.time())).filter_by(roomID = 1).all()
+        print(bookings)
         room_occ_list = []
         times = range(9,19)
-        rooms = Rooms.query.all()
+        rooms = Room.query.all()
         allrooms = []
         for room in rooms:
             room_oc = dict()
             room_oc['roomNum'] = room.roomNum
             room_oc['roomhours'] = [False]*14
             for hour in times:
-                bookings  = Booking.query.filter_by(date=datetime.combine(form.date.data,datetime.min.time())).filter_by(roomId=room.id).all()
+                bookings  = Booking.query.filter_by(date=datetime.combine(form.date.data,datetime.min.time())).filter_by(roomID=room.id).all()
+                print(datetime.combine(form.date.data,datetime.min.time()))
                 for booking in bookings:
-                    if hour + 0.5 < booking.endTime and hour +0.5 > meeting.startTime:
+                    if hour + 0.5 < booking.endTime and hour +0.5 > booking.startTime:
+                        print("idhar")
                         room_oc['roomhours'][hour-9] = True
-                room_occ_list.append(room_oc)
-                allrooms.append({'roomNum':room.roomNum,'ac':room.ac,'projector':room.projector})
+            room_occ_list.append(room_oc)            
+            allrooms.append({'roomNum':room.roomNum,'ac':room.ac,'projector':room.projector})
         return render_template('roomocclist.html',title='Room Occupancy',room_occ_list=room_occ_list, date=form.date.data,hours=[str(hour) for hour in times],allrooms=allrooms)
     return render_template('roomoccupation.html',title='Check Room Occupation',form=form)
 

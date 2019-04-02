@@ -42,7 +42,9 @@ class Booking(db.Model):
     endTime = db.Column(db.Integer)
     
     def __repr__(self):
-        return '<Booking Room Number {} for  {} by  {} on {} from {} to {}'.format(self.id,self.roomID.roomNum,self.purpose,self.bookerID.fullname,self.date,self.startTime,self.endTime)
+        room = Room.query.filter_by(id=self.roomID).first()
+        booker = User.query.filter_by(id=self.bookerID).first()
+        return '<Booking Room Number {} for  {} by  {} on {} from {} to {}'.format(room.roomNum,self.purpose,booker.fullname,self.date,self.startTime,self.endTime)
 
 @login.user_loader
 def load_user(id):

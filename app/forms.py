@@ -71,7 +71,9 @@ class BookingForm(FlaskForm):
 class BookingChoices(object):
     def __iter__(self):
         bookings = Booking.query.filter_by(bookerID=current_user.id).all()
-        bookings = [(booking.id,"{} in Room  {} on {} from {} to {}".format(booking.id,booking.roomID,booking.date,booking.startTime,booking.endTime)) for booking in bookings]
+        bookings = [(booking.id,"{} in Room  {} on {} from {} to {}".format(booking.id,Room.query.filter_by(id=booking.roomID).first().roomNum,booking.date,booking.startTime,booking.endTime)) for booking in bookings]
+        for booking in bookings:
+            yield booking
 
 class CancelBookingForm(FlaskForm):
     ids = SelectMultipleField('Choose Booking to cancel', coerce=int, choices=BookingChoices())
